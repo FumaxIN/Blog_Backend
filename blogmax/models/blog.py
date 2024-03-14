@@ -1,12 +1,13 @@
+import random
+import string
 from pydantic import Field, constr
 from essentials.basemodel import BaseModel
-from essentials.helpers import get_url
 
 
 class Blog(BaseModel):
     title: constr(max_length=100) = Field(...)
     content: constr(max_length=100000) = Field(...)
-    url: str = Field(default=get_url(8))
+    url: str = Field(default_factory=lambda: "".join(random.choices(string.hexdigits, k=8)))
     reads: int = Field(default=0)
     comments: int = Field(default=0)
     likes: int = Field(default=0)
