@@ -1,8 +1,11 @@
 from typing import Optional
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from config import settings
+from config.oauth import get_current_user
+
+from blogmax.models import User
 
 client = AsyncIOMotorClient(settings.DB_URL)
 db = client[settings.DB_NAME]
@@ -42,19 +45,25 @@ async def create_document(collection_name: str, data: dict):
     return inserted_document
 
 
-async def update_document(collection_name: str, id: str, data: dict):
+async def update_document(collection_name: str, id: str, data: dict, current_user: User):
     collection = await get_collection(collection_name)
-    result = await collection.update_one({"_id": id}, {"$set": data})
-    print(result.matched_count, result.modified_count, result.acknowledged)
-    if not result.matched_count:
+    blog = await collection.find_one({"_id": id})
+    if not blog:
         raise HTTPException(status_code=404, detail="Document not found")
-    document = await collection.find_one({"_id": id})
-    return document
+    if blog["author"]["_id"] != current_user.get("_id"):
+        raise HTTPException(status_code=401, detail="You are not authorized to update this blog")
+    await collection.update_one({"_id": id}, {"$set": data})
+    updated_blog = await collection.find_one({"_id": id})
+    return updated_blog
 
 
-async def delete_document(collection_name: str, id: str):
+async def delete_document(collection_name: str, id: str, current_user: User):
+    print("????", current_user.get("_id"))
     collection = await get_collection(collection_name)
-    deleted_document = await collection.delete_one({"_id": id})
-    if not deleted_document:
+    blog = await collection.find_one({"_id": id})
+    if not blog:
         raise HTTPException(status_code=404, detail="Document not found")
+    if blog["author"]["_id"] != current_user.get("_id"):
+        raise HTTPException(status_code=401, detail="You are not authorized to delete this blog")
+    await collection.delete_one({"_id": id})
     return HTTPException(status_code=204, detail="Document deleted")
