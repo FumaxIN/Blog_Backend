@@ -23,7 +23,6 @@ async def verify_token(token: str, credentials_exception):
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
-        print(token_data)
         return token_data
     except JWTError:
         raise credentials_exception
