@@ -3,6 +3,8 @@ import string
 from pydantic import Field, constr, BaseModel as PydanticBaseModel
 from essentials.basemodel import BaseModel
 
+from .user import User
+
 
 class Blog(PydanticBaseModel):
     title: constr(max_length=100) = Field(...)
@@ -23,6 +25,7 @@ class BlogInDB(Blog, BaseModel):
     reads: int = Field(default=0, read_only=True)
     comments: int = Field(default=0, read_only=True)
     likes: int = Field(default=0, read_only=True)
+    author: User
 
     class Config:
         populate_by_name = True

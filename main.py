@@ -4,8 +4,6 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 
-from bson.binary import Binary
-
 import uuid
 
 import uvicorn
@@ -17,9 +15,7 @@ from blogmax.routers.blog_routers import router as blog_routers
 from blogmax.routers.user_routers import router as user_routers
 
 from blogmax.models import User
-from essentials.motor_utilities import (
-    create_document,
-)
+
 from essentials.hashing import Hash
 from config import create_access_token
 
