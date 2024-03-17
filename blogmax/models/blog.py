@@ -1,23 +1,28 @@
 import random
 import string
-from pydantic import Field, constr
+from pydantic import Field, constr, BaseModel as PydanticBaseModel
 from essentials.basemodel import BaseModel
 
 
-class Blog(BaseModel):
+class Blog(PydanticBaseModel):
     title: constr(max_length=100) = Field(...)
     content: constr(max_length=100000) = Field(...)
-    url: str = Field(default_factory=lambda: "".join(random.choices(string.hexdigits, k=8)))
-    reads: int = Field(default=0)
-    comments: int = Field(default=0)
-    likes: int = Field(default=0)
 
     class Config:
-        allow_population_by_field_name = True
-        schema_extra = {
+        populate_by_name = True
+        json_schema_extra = {
             "example": {
                 "title": "My first blog",
                 "content": "This is my first blog content",
             }
         }
 
+
+class BlogInDB(Blog, BaseModel):
+    url: str = Field(default_factory=lambda: "".join(random.choices(string.hexdigits, k=8)))
+    reads: int = Field(default=0, read_only=True)
+    comments: int = Field(default=0, read_only=True)
+    likes: int = Field(default=0, read_only=True)
+
+    class Config:
+        populate_by_name = True
