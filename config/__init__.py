@@ -1,6 +1,9 @@
 from pydantic_settings import BaseSettings
 from urllib.parse import quote_plus
 
+from .jwttoken import *
+from .oauth import *
+
 
 class CommonSettings(BaseSettings):
     APP_NAME: str = "Blog API"

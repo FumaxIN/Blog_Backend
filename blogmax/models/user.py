@@ -51,5 +51,13 @@ class User(BaseModel):
                 }
             }
 
-    class TokenData(BaseModel):
-        username: str = None
+class TokenData(BaseModel):
+    username: str = None
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "username": "johndoe",
+            }
+        }
