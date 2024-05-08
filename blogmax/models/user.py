@@ -55,3 +55,11 @@ class TokenData(BaseModel):
                 "username": "johndoe",
             }
         }
+
+
+class Follow(BaseModel):
+    follower: User
+    following: User
+
+    class Config:
+        populate_by_name = True

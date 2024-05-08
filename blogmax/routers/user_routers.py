@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from fastapi.encoders import jsonable_encoder
 
 from typing import Annotated
 from config.oauth import get_current_user
 
 from utils.motor_utilities import get_collection
-from ..models import User, UpdateUser
+from ..models import User, UpdateUser, Follow
 
 router = APIRouter()
 
@@ -75,3 +76,24 @@ async def remove_tags_from_user(
 
     updated_user = await user_collection.find_one({"_id": current_user["_id"]})
     return updated_user
+
+
+@router.put("/follow", response_description="Follow a user")
+async def follow_user(
+        username: str,
+        current_user: User = Depends(get_current_user)
+):
+    user_collection = await get_collection("users")
+    user = await user_collection.find_one({"username": username})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    follow_collection = await get_collection("follows")
+    if await follow_collection.find_one({"follower._id": current_user["_id"], "following._id": user["_id"]}):
+        raise HTTPException(status_code=400, detail="Already following user")
+
+    follow = Follow(follower=current_user, following=user)
+    await follow_collection.insert_one(jsonable_encoder(follow))
+
+    return {"status": "Followed"}
