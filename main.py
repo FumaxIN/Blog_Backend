@@ -57,6 +57,13 @@ app.include_router(user_routers, tags=["user"], prefix="/user")
 async def create_user(request: User):
     hashed_password = Hash.bcrypt(request.password)
     user_object = dict(request)
+
+    if await db["users"].find_one({"username": user_object["username"]}):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Username already exists"
+        )
+
     user_object["password"] = hashed_password
     # remove id from request
     user_object.pop("id")
