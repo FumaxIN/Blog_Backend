@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Body, Request, Depends
+from fastapi import APIRouter, status, Body, Request, Depends, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from typing import Annotated
@@ -12,16 +12,19 @@ from utils.motor_utilities import (
     update_document,
     delete_document
 )
+from utils.notify import send_blog_notification
 
 router = APIRouter()
 
 
 # ----------------- Blog -----------------
 @router.post("", response_description="Add new blog")
-async def create_blog(request: Request, blog: Blog = Body(...), author: User = Depends(get_current_user)):
+async def create_blog(request: Request, background_tasks: BackgroundTasks, blog: Blog = Body(...), author: User = Depends(get_current_user)):
     blog_data = blog.dict()
     blog_in_db = BlogInDB(**blog_data, author=author)
+    background_tasks.add_task(send_blog_notification, blog_in_db.dict(), author)
     response = await create_document("blogs", jsonable_encoder(blog_in_db))
+
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
 
 
