@@ -1,10 +1,10 @@
-from fastapi import APIRouter, status, Body, Request, Depends
+from fastapi import APIRouter, status, Body, Request, Depends, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from typing import Annotated
 from config.oauth import get_current_user
 
-from ..models import Blog, BlogInDB, User
+from ..models import Blog, BlogUpdate, BlogInDB, User
 from utils.motor_utilities import (
     create_document,
     read_collection,
@@ -12,26 +12,35 @@ from utils.motor_utilities import (
     update_document,
     delete_document
 )
+from utils.notify import send_blog_notification
 
 router = APIRouter()
 
 
 # ----------------- Blog -----------------
 @router.post("", response_description="Add new blog")
-async def create_blog(request: Request, blog: Blog = Body(...), author: User = Depends(get_current_user)):
+async def create_blog(request: Request, background_tasks: BackgroundTasks, blog: Blog = Body(...), author: User = Depends(get_current_user)):
     blog_data = blog.dict()
     blog_in_db = BlogInDB(**blog_data, author=author)
+    background_tasks.add_task(send_blog_notification, blog_in_db.dict(), author)
     response = await create_document("blogs", jsonable_encoder(blog_in_db))
+
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
 
 
 @router.get("", response_description="List all blogs", response_model=list[BlogInDB])
-async def list_blogs(request: Request, title: str = "", content: str = ""):
+async def list_blogs(request: Request, title: str = "", content: str = "", tag: str = ""):
+    queries = {}
+    if title:
+        queries["title"] = {"$regex": title, "$options": "i"}
+    if content:
+        queries["content"] = {"$regex": content, "$options": "i"}
+    if tag:
+        queries["tags"] = {"$in": [tag]}
+
     return await read_collection(
         "blogs",
-        {
-            "title": {"$regex": title, "$options": "i"},
-            "content": {"$regex": content, "$options": "i"}}
+        queries
     )
 
 
@@ -41,7 +50,7 @@ async def read(id: str):
 
 
 @router.put("/{id}", response_description="Update a blog")
-async def update(id: str, data: dict, current_user: Annotated[User, Depends(get_current_user)]):
+async def update(id: str, current_user: Annotated[User, Depends(get_current_user)], data: BlogUpdate = None):
     return await update_document("blogs", id, data, current_user)
 
 

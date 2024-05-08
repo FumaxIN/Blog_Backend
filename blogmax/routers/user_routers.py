@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 
@@ -6,6 +6,7 @@ from typing import Annotated
 from config.oauth import get_current_user
 
 from utils.motor_utilities import get_collection
+from utils.notify import send_follow_notification
 from ..models import User, UpdateUser, Follow
 
 router = APIRouter()
@@ -80,6 +81,7 @@ async def remove_tags_from_user(
 
 @router.put("/follow", response_description="Follow a user")
 async def follow_user(
+        background_tasks: BackgroundTasks,
         username: str,
         current_user: User = Depends(get_current_user)
 ):
@@ -94,6 +96,9 @@ async def follow_user(
         raise HTTPException(status_code=400, detail="Already following user")
 
     follow = Follow(follower=current_user, following=user)
+    print(follow.dict())
     await follow_collection.insert_one(jsonable_encoder(follow))
+
+    background_tasks.add_task(send_follow_notification, follow.dict())
 
     return {"status": "Followed"}

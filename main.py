@@ -48,7 +48,7 @@ async def shutdown_event():
     app.mongodb_client.close()
 
 
-app.include_router(blog_routers, tags=["blog"], prefix="/blog")
+app.include_router(blog_routers, tags=["blog"], prefix="/blogs")
 app.include_router(user_routers, tags=["user"], prefix="/user")
 
 
