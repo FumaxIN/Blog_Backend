@@ -45,14 +45,14 @@ async def create_document(collection_name: str, data: dict):
     return inserted_document
 
 
-async def update_document(collection_name: str, id: str, data: dict, current_user: User):
+async def update_document(collection_name: str, id: str, data, current_user: User):
     collection = await get_collection(collection_name)
     blog = await collection.find_one({"_id": id})
     if not blog:
         raise HTTPException(status_code=404, detail="Document not found")
     if blog["author"]["_id"] != current_user.get("_id"):
         raise HTTPException(status_code=401, detail="You are not authorized to update this blog")
-    await collection.update_one({"_id": id}, {"$set": data})
+    await collection.update_one({"_id": id}, {"$set": data.dict(exclude_unset=True)})
     updated_blog = await collection.find_one({"_id": id})
     return updated_blog
 

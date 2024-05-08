@@ -4,7 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from typing import Annotated
 from config.oauth import get_current_user
 
-from ..models import Blog, BlogInDB, User
+from ..models import Blog, BlogUpdate, BlogInDB, User
 from utils.motor_utilities import (
     create_document,
     read_collection,
@@ -41,7 +41,7 @@ async def read(id: str):
 
 
 @router.put("/{id}", response_description="Update a blog")
-async def update(id: str, data: dict, current_user: Annotated[User, Depends(get_current_user)]):
+async def update(id: str, current_user: Annotated[User, Depends(get_current_user)], data: BlogUpdate = None):
     return await update_document("blogs", id, data, current_user)
 
 
