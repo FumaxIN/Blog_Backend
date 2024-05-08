@@ -16,7 +16,7 @@ from blogmax.routers.user_routers import router as user_routers
 
 from blogmax.models import User
 
-from essentials.hashing import Hash
+from utils.hashing import Hash
 from config import create_access_token
 
 app = FastAPI()
@@ -62,8 +62,8 @@ async def create_user(request: User):
     user_object.pop("id")
     user_object["_id"] = str(uuid.uuid4())
     insert_user = await db["users"].insert_one(user_object)
-    print(insert_user)
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content={"creation": "success"})
+    access_token = create_access_token(data={"sub": user_object["username"]})
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @app.post("/login", tags=["auth"])

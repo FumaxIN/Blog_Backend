@@ -3,7 +3,7 @@ import string
 from datetime import datetime
 
 from pydantic import BaseModel as PydanticBaseModel, Field, constr
-from essentials.basemodel import BaseModel
+from utils.basemodel import BaseModel
 
 
 class User(BaseModel):
@@ -50,6 +50,7 @@ class User(BaseModel):
                     "token_type": "bearer",
                 }
             }
+
 
 class TokenData(BaseModel):
     username: str = None

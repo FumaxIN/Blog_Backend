@@ -16,9 +16,9 @@ class ServerSettings(BaseSettings):
 
 
 class DatabaseSettings(BaseSettings):
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_NAME: str
+    DB_USER: str = "fumax"
+    DB_PASSWORD: str = "blogmax"
+    DB_NAME: str = "blog-management"
 
     @property
     def encoded_user(self):

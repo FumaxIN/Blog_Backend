@@ -1,7 +1,7 @@
 import random
 import string
 from pydantic import Field, constr, BaseModel as PydanticBaseModel
-from essentials.basemodel import BaseModel
+from utils.basemodel import BaseModel
 
 from .user import User
 

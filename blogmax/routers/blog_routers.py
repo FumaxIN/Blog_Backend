@@ -5,7 +5,7 @@ from typing import Annotated
 from config.oauth import get_current_user
 
 from ..models import Blog, BlogInDB, User
-from essentials.motor_utilities import (
+from utils.motor_utilities import (
     create_document,
     read_collection,
     read_document,
