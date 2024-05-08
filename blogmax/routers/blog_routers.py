@@ -26,12 +26,18 @@ async def create_blog(request: Request, blog: Blog = Body(...), author: User = D
 
 
 @router.get("", response_description="List all blogs", response_model=list[BlogInDB])
-async def list_blogs(request: Request, title: str = "", content: str = ""):
+async def list_blogs(request: Request, title: str = "", content: str = "", tag: str = ""):
+    queries = {}
+    if title:
+        queries["title"] = {"$regex": title, "$options": "i"}
+    if content:
+        queries["content"] = {"$regex": content, "$options": "i"}
+    if tag:
+        queries["tags"] = {"$in": [tag]}
+
     return await read_collection(
         "blogs",
-        {
-            "title": {"$regex": title, "$options": "i"},
-            "content": {"$regex": content, "$options": "i"}}
+        queries
     )
 
 

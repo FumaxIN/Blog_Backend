@@ -16,15 +16,18 @@ async def get_collection(collection_name: str):
     return collection
 
 
-async def read_collection(collection_name: str, query: Optional[dict] = None):
+async def read_collection(collection_name: str, query: dict = None):
     collection = await get_collection(collection_name)
     documents = []
 
     if query:
+        print("Query", query)
         async for document in collection.find(query):
+            print(document.get("title"))
             documents.append(document)
     else:
         async for document in collection.find():
+            print(document.get("title"))
             documents.append(document)
 
     return documents
