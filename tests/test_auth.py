@@ -9,7 +9,7 @@ client = TestClient(app)
 
 async def login(client: AsyncClient, username: str, password: str):
     response = await client.post(
-        "/api/auth/login",
+        "/login",
         data={
             "username": username,
             "password": password
