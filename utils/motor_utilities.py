@@ -1,6 +1,6 @@
-from typing import Optional
 from fastapi import HTTPException, Depends
 from motor.motor_asyncio import AsyncIOMotorClient
+from fastapi import Request
 
 from config import settings
 from config.oauth import get_current_user
@@ -16,21 +16,30 @@ async def get_collection(collection_name: str):
     return collection
 
 
-async def read_collection(collection_name: str, query: dict = None):
+async def read_collection(collection_name: str, query: dict = None, skip: int = 0, limit: int = 2):
     collection = await get_collection(collection_name)
     documents = []
+    total_count = await collection.count_documents(query)
 
     if query:
-        print("Query", query)
-        async for document in collection.find(query):
-            print(document.get("title"))
+        cursor = collection.find(query).skip(skip).limit(limit)
+        async for document in cursor:
             documents.append(document)
     else:
-        async for document in collection.find():
-            print(document.get("title"))
+        cursor = collection.find().skip(skip).limit(limit)
+        async for document in cursor:
             documents.append(document)
 
-    return documents
+    has_next = (skip + len(documents)) < total_count
+    has_previous = skip > 0
+
+    return {
+        "count": len(documents),
+        "total_count": total_count,
+        "has_next": has_next,
+        "has_previous": has_previous,
+        "documents": documents,
+    }
 
 
 async def read_document(collection_name: str, id: str):

@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi import Depends, HTTPException, status
-from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,6 +12,7 @@ from config import settings
 
 from blogmax.routers.blog_routers import router as blog_routers
 from blogmax.routers.user_routers import router as user_routers
+from blogmax.routers.dashboard import router as dashboard_routers
 
 from blogmax.models import User
 
@@ -49,7 +49,8 @@ async def shutdown_event():
 
 
 app.include_router(blog_routers, tags=["blog"], prefix="/blogs")
-app.include_router(user_routers, tags=["user"], prefix="/user")
+app.include_router(user_routers, tags=["user"], prefix="/users")
+app.include_router(dashboard_routers, tags=["dashboard"], prefix="/dashboard")
 
 
 # ----------------- User -----------------

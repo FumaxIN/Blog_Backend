@@ -96,7 +96,6 @@ async def follow_user(
         raise HTTPException(status_code=400, detail="Already following user")
 
     follow = Follow(follower=current_user, following=user)
-    print(follow.dict())
     await follow_collection.insert_one(jsonable_encoder(follow))
 
     background_tasks.add_task(send_follow_notification, follow.dict())
