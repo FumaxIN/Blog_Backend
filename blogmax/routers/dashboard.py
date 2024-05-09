@@ -3,9 +3,10 @@ from typing import Annotated, List
 from collections import Counter
 from config.oauth import get_current_user
 
-from ..models import User
+from ..models import User, Notification
 from utils.motor_utilities import (
     read_collection,
+    get_collection
 )
 
 router = APIRouter()
@@ -33,4 +34,24 @@ async def list_blogs_by_user_tags(
     return sorted_blog_objects
 
 
+@router.get("/notifications", response_description="List all notifications for current user")
+async def list_notifications(
+        request: Request, current_user: Annotated[User, Depends(get_current_user)], skip: int = 0, limit: int = 10
+):
+    return await read_collection("notifications", {"user._id": current_user.get("_id")}, skip, limit)
 
+
+@router.post("/notifications/read", response_description="Read all unread notifications for current user")
+async def read_notifications(
+        request: Request, current_user: Annotated[User, Depends(get_current_user)]
+):
+    notifs = await get_collection("notifications")
+    await notifs.update_many({"user._id": current_user.get("_id"), "read": False}, {"$set": {"read": True}})
+
+    return {"message": "All notifications are read"}
+
+@router.get("/notifications/unread", response_description="List all unread notifications for current user")
+async def list_unread_notifications(
+        request: Request, current_user: Annotated[User, Depends(get_current_user)], skip: int = 0, limit: int = 10
+):
+    return await read_collection("notifications", {"user._id": current_user.get("_id"), "read": False}, skip, limit)
