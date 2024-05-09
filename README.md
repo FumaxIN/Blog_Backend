@@ -7,6 +7,7 @@ Backend system for managing Blogs, built using FastAPI and MongoDB.
 * Tests included
 * Utilized Dependency injection
 * Utilized background tasks for creating notifications
+* deployed on render: [Blog-Management](https://blog-backend-d27b.onrender.com)
 
 ## Requirements
 
