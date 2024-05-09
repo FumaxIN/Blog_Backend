@@ -25,9 +25,7 @@ client = AsyncIOMotorClient(settings.DB_URL)
 db = client[settings.DB_NAME]
 
 origins = [
-    "http://localhost:3000",
-    "http://localhost:8080",
-    "http://localhost:8000",
+    "*",
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -80,19 +78,21 @@ async def create_user(request: User):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@app.post("/api/auth/login", tags=["auth"])
-async def login(request: OAuth2PasswordRequestForm = Depends()):
-    user = await db["users"].find_one({"username": request.username})
+@app.post("/login", tags=["auth"])
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await db["users"].find_one({"username": form_data.username})
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Invalid username or password"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password"
         )
-    if not Hash.verify(user["password"], request.password):
+
+    if not Hash.verify(user["password"], form_data.password):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Invalid username or password"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password"
         )
+
     access_token = create_access_token(data={"sub": user["username"]})
     return {"access_token": access_token, "token_type": "bearer"}
 
