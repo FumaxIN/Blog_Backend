@@ -44,6 +44,16 @@ class UpdateUser(BaseModel):
             }
         }
 
+class UpdateTags(BaseModel):
+    tags: list[str]
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "tags": ["tag1", "tag2"],
+            }
+        }
 
 class TokenData(BaseModel):
     username: str = None

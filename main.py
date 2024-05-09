@@ -1,3 +1,4 @@
+from fastapi.responses import RedirectResponse
 from fastapi import FastAPI
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -48,13 +49,18 @@ async def shutdown_event():
     app.mongodb_client.close()
 
 
-app.include_router(blog_routers, tags=["blog"], prefix="/blogs")
-app.include_router(user_routers, tags=["user"], prefix="/users")
-app.include_router(dashboard_routers, tags=["dashboard"], prefix="/dashboard")
+# redirect / to /docs
+@app.get("/", include_in_schema=False)
+async def redirect_to_docs():
+    return RedirectResponse(url="/docs")
+
+app.include_router(blog_routers, tags=["blog"], prefix="/api/blogs")
+app.include_router(user_routers, tags=["user"], prefix="/api/users")
+app.include_router(dashboard_routers, tags=["dashboard"], prefix="/api/dashboard")
 
 
 # ----------------- User -----------------
-@app.post("/register", tags=["auth"])
+@app.post("/api/auth/register", tags=["auth"])
 async def create_user(request: User):
     hashed_password = Hash.bcrypt(request.password)
     user_object = dict(request)
@@ -74,7 +80,7 @@ async def create_user(request: User):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@app.post("/login", tags=["auth"])
+@app.post("/api/auth/login", tags=["auth"])
 async def login(request: OAuth2PasswordRequestForm = Depends()):
     user = await db["users"].find_one({"username": request.username})
     if not user:

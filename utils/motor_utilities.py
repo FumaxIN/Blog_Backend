@@ -19,7 +19,7 @@ async def get_collection(collection_name: str):
 async def read_collection(collection_name: str, query: dict = None, skip: int = 0, limit: int = 2):
     collection = await get_collection(collection_name)
     documents = []
-    total_count = await collection.count_documents(query)
+    total_count = await collection.count_documents(query or {})
 
     if query:
         cursor = collection.find(query).skip(skip).limit(limit)

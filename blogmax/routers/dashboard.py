@@ -24,8 +24,8 @@ async def list_blogs_by_user_tags(
         request: Request, current_user: Annotated[User, Depends(get_current_user)], skip: int = 0, limit: int = 10
 ):
     all_blogs = await read_collection("blogs", skip=skip, limit=limit)
-
-    blogs_with_scores = [(blog, calculate_tag_similarity(current_user.get("tags"), blog.get("tags"))) for blog in all_blogs]
+    print(all_blogs.get("documents"))
+    blogs_with_scores = [(blog, calculate_tag_similarity(current_user.get("tags"), blog.get("tags"))) for blog in all_blogs.get("documents")]
 
     sorted_blogs = sorted(blogs_with_scores, key=lambda x: x[1], reverse=True)
     sorted_blog_objects = [blog for blog, _ in sorted_blogs]
