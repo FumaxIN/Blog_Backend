@@ -20,8 +20,10 @@ def calculate_tag_similarity(user_tags: List[str], blog_tags: List[str]) -> int:
 
 # ----------------- Blog by User's tags preference -----------------
 @router.get("/blogs", response_description="List all blogs by user's tags preference")
-async def list_blogs_by_user_tags(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
-    all_blogs = await read_collection("blogs")
+async def list_blogs_by_user_tags(
+        request: Request, current_user: Annotated[User, Depends(get_current_user)], skip: int = 0, limit: int = 10
+):
+    all_blogs = await read_collection("blogs", skip=skip, limit=limit)
 
     blogs_with_scores = [(blog, calculate_tag_similarity(current_user.get("tags"), blog.get("tags"))) for blog in all_blogs]
 
