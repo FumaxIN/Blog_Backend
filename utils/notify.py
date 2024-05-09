@@ -5,7 +5,11 @@ from fastapi.encoders import jsonable_encoder
 
 async def send_blog_notification(blog, author: User):
     follow_collection = await read_collection("follows", {"following._id": author.get("_id")})
-    for follower in follow_collection:
+    print(follow_collection)
+    if not follow_collection:
+        print("No followers")
+        return
+    for follower in follow_collection.get("documents"):
         notification = Notification(**{
             "user": follower["follower"],
             "title": "New Blog Post",
