@@ -48,7 +48,7 @@ To run the tests in Docker setup, keep the container running and run the followi
 * Create a virtual environment
 ```bash
 python -m venv ./venv
-source ./venv/bin/activate
+source venv/bin/activate
 ```
 
 * Install the requirements
