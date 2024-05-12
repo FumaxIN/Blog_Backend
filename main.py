@@ -14,6 +14,7 @@ from config import settings
 from blogmax.routers.blog_routers import router as blog_routers
 from blogmax.routers.user_routers import router as user_routers
 from blogmax.routers.dashboard import router as dashboard_routers
+from blogmax.routers.comment_routers import router as comment_routers
 
 from blogmax.models import User
 
@@ -55,6 +56,7 @@ async def redirect_to_docs():
 app.include_router(blog_routers, tags=["blog"], prefix="/api/blogs")
 app.include_router(user_routers, tags=["user"], prefix="/api/users")
 app.include_router(dashboard_routers, tags=["dashboard"], prefix="/api/dashboard")
+app.include_router(comment_routers, tags=["comment"], prefix="/api")
 
 
 # ----------------- User -----------------
