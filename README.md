@@ -64,6 +64,14 @@ pytest
 uvicorn main:app --reload
 ```
 
+### Note:
+* `/like` endpoint will both like and dislike a blog.
+* `/dashboard/blogs` fetches blogs as per the user tags.
+* A `notification` is created as a background task for actions including:
+  * a user you are following creates a new blog
+  * a user follows you
+  * a user likes your blog
+  * a user comment on your blog
 
 
 ## Swagger-Doc for authorization
