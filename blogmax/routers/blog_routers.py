@@ -73,22 +73,32 @@ async def like_blog(
         id: str,
         current_user: Annotated[User, Depends(get_current_user)]
 ):
-    # try:
-    blog_collection = await get_collection("blogs")
-    blog_doc = await blog_collection.find_one({"_id": id})
+    try:
+        blog_collection = await get_collection("blogs")
+        blog_doc = await blog_collection.find_one({"_id": id})
 
-    likes = await get_collection("likes")
-    liked = await likes.find_one({"liker._id": current_user["_id"], "blog._id": id})
-    if liked:
-        await likes.delete_one({"_id": liked["_id"]})
-        await blog_collection.update_one({"_id": id}, {"$inc": {"likes": -1}})
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "Unliked"})
-    else:
-        blog = BlogInDB(**blog_doc)
-        like = Like(liker=current_user, blog=blog)
-        await create_document("likes", jsonable_encoder(like))
-        await blog_collection.update_one({"_id": id}, {"$inc": {"likes": 1}})
-        background_tasks.add_task(send_like_notification, like.dict(), blog.author)
-        return JSONResponse(status_code=status.HTTP_201_CREATED, content={"status": "Liked"})
-    # except Exception as e:
-    #     return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(e)})
+        likes = await get_collection("likes")
+        liked = await likes.find_one({"liker._id": current_user["_id"], "blog._id": id})
+        if liked:
+            await likes.delete_one({"_id": liked["_id"]})
+            await blog_collection.update_one({"_id": id}, {"$inc": {"likes": -1}})
+            return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "Unliked"})
+        else:
+            blog = BlogInDB(**blog_doc)
+            like = Like(liker=current_user, blog=blog)
+            await create_document("likes", jsonable_encoder(like))
+            await blog_collection.update_one({"_id": id}, {"$inc": {"likes": 1}})
+            background_tasks.add_task(send_like_notification, like.dict(), blog.author)
+            return JSONResponse(status_code=status.HTTP_201_CREATED, content={"status": "Liked"})
+    except Exception as e:
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(e)})
+
+
+@router.get("/{id}/liked_by", response_description="List users who liked the blog")
+async def liked_by(id: str, skip: int = 0, limit: int = 10):
+    try:
+        likes = await get_collection("likes")
+        liked = await likes.find({"blog._id": id}, skip=skip, limit=limit).to_list(limit)
+        return liked
+    except Exception as e:
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(e)})

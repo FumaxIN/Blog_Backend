@@ -7,8 +7,8 @@ from .user import User
 
 
 class Blog(BaseModel):
-    title: constr(max_length=100) = Field(...)
-    content: constr(max_length=100000) = Field(...)
+    title: constr(max_length=100, min_length=1) = Field(...)
+    content: constr(max_length=100000, min_length=1) = Field(...)
     tags: list[str] = Field(default_factory=list)
 
     class Config:

@@ -6,7 +6,6 @@ from fastapi.encoders import jsonable_encoder
 async def send_blog_notification(blog, author: User):
     follow_collection = await read_collection("follows", {"following._id": author.get("_id")})
     if not follow_collection:
-        print("No followers")
         return
     for follower in follow_collection.get("documents"):
         notification = Notification(**{
@@ -35,5 +34,14 @@ async def send_like_notification(like, user=None):
         "content": f"{like.get('liker').get('username')} liked your blog titled {like.get('blog').get('title')}",
         "redirect_url": f"/blogs/{like.get('blog').get('url')}"
     })
-    print(notification)
+    await create_document("notifications", jsonable_encoder(notification))
+
+
+async def send_comment_notification(comment, user=None):
+    notification = Notification(**{
+        "user": user,
+        "title": "New Comment",
+        "content": f"{comment.get('commenter').get('username')} commented on your blog titled {comment.get('blog').get('title')}",
+        "redirect_url": f"/blogs/{comment.get('blog').get('url')}"
+    })
     await create_document("notifications", jsonable_encoder(notification))
