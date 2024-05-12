@@ -1,5 +1,3 @@
-import random
-import string
 from pydantic import Field, constr, BaseModel as PydanticBaseModel
 from utils.basemodel import BaseModel
 

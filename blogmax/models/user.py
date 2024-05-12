@@ -44,6 +44,7 @@ class UpdateUser(BaseModel):
             }
         }
 
+
 class UpdateTags(BaseModel):
     tags: list[str]
 
@@ -54,6 +55,7 @@ class UpdateTags(BaseModel):
                 "tags": ["tag1", "tag2"],
             }
         }
+
 
 class TokenData(BaseModel):
     username: str = None
