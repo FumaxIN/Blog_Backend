@@ -13,8 +13,7 @@ Backend system for managing Blogs, built using FastAPI and MongoDB.
 
 ##### For running the script
 
-**NOTE**: I have deployed Celery which seemed a better solution instead of Django signals. <br />
-You can either install Docker for hassle-free setup, or install  Redis for conventional setup.
+**NOTE**: You can either install Docker for hassle-free setup, or install  Redis for conventional setup.
 
 
 - [Python](https://www.python.org/downloads/)
